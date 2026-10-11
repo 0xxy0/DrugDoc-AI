@@ -1,0 +1,58 @@
+
+services:
+  drugdoc-ai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: drugdoc-ai:local
+    container_name: drugdoc-ai
+    restart: unless-stopped
+
+    ports:
+      - "8501:8501"
+
+    environment:
+      DRUGDOC_ENVIRONMENT: development
+      DRUGDOC_DEBUG: "false"
+      DRUGDOC_LOG_LEVEL: INFO
+
+      DRUGDOC_DATA_DIR: data
+      DRUGDOC_UPLOAD_DIR: data/uploads
+      DRUGDOC_SAMPLE_LABELS_DIR: data/sample_labels
+      DRUGDOC_EVALUATION_DIR: data/evaluation
+      DRUGDOC_REPORTS_DIR: reports
+
+      DRUGDOC_VECTOR_STORE_TYPE: qdrant_local
+      DRUGDOC_QDRANT_PATH: data/qdrant
+
+      DRUGDOC_LLM_PROVIDER: ollama
+      DRUGDOC_OLLAMA_BASE_URL: http://host.docker.internal:11434
+      DRUGDOC_OLLAMA_MODEL: llama3.1:8b
+
+      DRUGDOC_OCR_ENABLED: "true"
+      DRUGDOC_OCR_LANGUAGE: eng
+
+    volumes:
+      - drugdoc-data:/app/data
+      - drugdoc-reports:/app/reports
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8501/_stcore/health', timeout=3)"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
+
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  drugdoc-data:
+  drugdoc-reports:

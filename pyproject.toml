@@ -1,0 +1,88 @@
+
+[build-system]
+requires = ["setuptools>=75.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "drugdoc-ai"
+version = "0.1.0"
+description = "Evidence-grounded AI assistant for pharmaceutical drug-label documents"
+readme = "README.md"
+requires-python = ">=3.11,<3.15"
+license = "MIT"
+authors = [
+    { name = "DrugDoc AI Team" }
+]
+dependencies = [
+    "PyMuPDF>=1.24.10,<2.0",
+    "PyYAML>=6.0.2,<7.0",
+    "sentence-transformers>=3.3.0,<6.0",
+    "qdrant-client>=1.12.0,<2.0",
+    "rank-bm25>=0.2.2,<1.0",
+    "numpy>=1.26.4,<3.0",
+    "openai>=1.59.0,<3.0",
+    "ollama>=0.4.7,<1.0",
+    "streamlit>=1.41.0,<2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0,<9.0",
+    "pytest-cov>=6.0.0,<8.0",
+    "ruff>=0.9.0,<1.0",
+    "mypy>=1.14.0,<2.0",
+    "httpx>=0.28.0,<1.0",
+]
+
+ocr = [
+    "pytesseract>=0.3.13,<1.0",
+    "Pillow>=11.0.0,<13.0",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-ra --strict-markers"
+markers = [
+    "unit: fast unit tests",
+    "integration: tests requiring external services or models",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+src = ["src", "tests", "scripts"]
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "I",
+    "UP",
+    "B",
+]
+ignore = [
+    "E501",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.coverage.run]
+branch = true
+source = ["drugdoc"]
+omit = [
+    "*/__init__.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+fail_under = 70

@@ -1,0 +1,154 @@
+# ============================================================================
+# DrugDoc AI — application configuration
+# ============================================================================
+# Relative paths are resolved against the project root by config.py.
+# Environment variables (DRUGDOC_*) override these values.
+# Never commit secrets to this file. Use .env instead.
+# ============================================================================
+
+# ---------------------------------------------------------------------------
+# Application
+# ---------------------------------------------------------------------------
+app_name: "DrugDoc AI"
+environment: "development"
+debug: false
+log_level: "INFO"
+
+# ---------------------------------------------------------------------------
+# Paths
+# ---------------------------------------------------------------------------
+data_dir: "data"
+upload_dir: "data/uploads"
+sample_labels_dir: "data/sample_labels"
+evaluation_dir: "data/evaluation"
+reports_dir: "reports"
+
+evaluation_questions_file: "data/evaluation/questions.jsonl"
+expected_evidence_file: "data/evaluation/expected_evidence.jsonl"
+
+# ---------------------------------------------------------------------------
+# Document ingestion
+# ---------------------------------------------------------------------------
+max_upload_size_mb: 25
+allowed_extensions:
+  - ".pdf"
+
+ocr_enabled: true
+ocr_language: "eng"
+min_text_characters_per_page: 40
+
+# ---------------------------------------------------------------------------
+# Chunking
+# ---------------------------------------------------------------------------
+# chunking_strategy:
+#   "fixed"    -> overlap-aware sliding window (baseline, fast)
+#   "semantic" -> paragraph / section-aware chunking (better quality)
+chunking_strategy: "fixed"
+
+chunk_size: 900
+chunk_overlap: 150
+
+# Bounds used only when chunking_strategy is "semantic".
+semantic_min_chunk_chars: 250
+semantic_max_chunk_chars: 1400
+
+# Optional chunk summarization (extra embedded field for retrieval).
+# Requires an LLM provider to be configured and reachable.
+chunk_summarization_enabled: false
+chunk_summary_max_tokens: 80
+
+# ---------------------------------------------------------------------------
+# Embeddings
+# ---------------------------------------------------------------------------
+embedding_model: "sentence-transformers/all-MiniLM-L6-v2"
+embedding_device: "cpu"
+embedding_batch_size: 8
+
+# ---------------------------------------------------------------------------
+# Retrieval
+# ---------------------------------------------------------------------------
+dense_retrieval_enabled: true
+sparse_retrieval_enabled: true
+
+retrieval_top_k: 5
+dense_candidate_k: 10
+sparse_candidate_k: 10
+rrf_k: 60
+min_evidence_score: 0.0
+
+# Multi-query expansion: the LLM rewrites the query N times to improve recall.
+retrieval_multi_query_enabled: true
+retrieval_multi_query_count: 3
+
+# Recursive retrieval: if the first pass returns too few chunks, re-query
+# using the top passage as additional context.
+retrieval_recursive_enabled: true
+retrieval_recursive_depth: 2
+retrieval_recursive_min_chunks: 3
+
+# Maximal Marginal Relevance: rerank candidates for diversity.
+retrieval_mmr_enabled: true
+retrieval_mmr_lambda: 0.7
+
+# ---------------------------------------------------------------------------
+# Vector database
+# ---------------------------------------------------------------------------
+vector_store_type: "qdrant_local"
+
+# Local persistent Qdrant storage.
+# Do not point this path at a directory used by another running Qdrant process.
+# For server mode, use qdrant_url instead.
+qdrant_path: "data/qdrant"
+qdrant_url: "http://localhost:6333"
+qdrant_api_key: null
+qdrant_collection: "drugdoc_labels"
+
+# ---------------------------------------------------------------------------
+# Language model
+# ---------------------------------------------------------------------------
+# Supported providers: "ollama" or "openai"
+llm_provider: "ollama"
+
+ollama_base_url: "http://localhost:11434"
+ollama_model: "llama3.1:8b"
+
+openai_model: "gpt-4o-mini"
+# Never put a real key here. Use OPENAI_API_KEY in .env instead.
+openai_api_key: null
+
+llm_temperature: 0.1
+llm_max_tokens: 384
+llm_timeout_seconds: 60
+
+# ---------------------------------------------------------------------------
+# Answer safety and verification
+# ---------------------------------------------------------------------------
+abstention_enabled: true
+require_citations: true
+max_context_chunks: 5
+
+# Self-correction: after drafting an answer, verify it is fully supported
+# by the retrieved evidence. If not, the pipeline abstains.
+self_correction_enabled: true
+
+# ---------------------------------------------------------------------------
+# UI-facing behavior (used by app.py)
+# ---------------------------------------------------------------------------
+# Show the step-by-step retrieval trace in the QA interface.
+show_retrieval_trace: true
+
+# Enable the "compare with base LLM" toggle in the UI.
+# Only useful if the LLM provider is reachable.
+enable_answer_comparison: false
+
+# --- NEW ------------------------------------------------------------------
+# When true, the pipeline ignores the verifier's reason string in the UI
+# if it does not look like a normal English sentence. Keeps the demo clean.
+# (The pipeline still records the reason internally for reports.)
+display_verifier_reason: false
+
+# --- NEW ------------------------------------------------------------------
+# Strip common "model describing itself" artifacts from the answer text,
+# such as "Concise answer supported by the evidence" left over from the
+# prompt template. Helpful when using small local models.
+sanitize_answer_text: true
