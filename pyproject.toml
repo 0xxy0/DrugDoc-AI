@@ -1,14 +1,13 @@
-
 [build-system]
 requires = ["setuptools>=75.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "drugdoc-ai"
-version = "0.1.0"
+version = "0.2.0"
 description = "Evidence-grounded AI assistant for pharmaceutical drug-label documents"
 readme = "README.md"
-requires-python = ">=3.11,<3.15"
+requires-python = ">=3.11,<3.13"
 license = "MIT"
 authors = [
     { name = "DrugDoc AI Team" }
@@ -39,6 +38,17 @@ ocr = [
     "Pillow>=11.0.0,<13.0",
 ]
 
+# --- Poetry configuration (Streamlit Cloud) -------------------------------
+# Streamlit Cloud detects pyproject.toml and switches to Poetry mode.
+# The project uses a src-layout (src/drugdoc/...), and Poetry's default
+# editable-install behavior looks for a package literally named
+# "drugdoc_ai" — which does not exist. Setting package-mode to false
+# tells Poetry to install dependencies only and skip installing the
+# project itself. app.py adds src/ to sys.path at runtime instead.
+[tool.poetry]
+package-mode = false
+
+# --- Tooling --------------------------------------------------------------
 [tool.setuptools]
 package-dir = {"" = "src"}
 
@@ -60,16 +70,8 @@ target-version = "py311"
 src = ["src", "tests", "scripts"]
 
 [tool.ruff.lint]
-select = [
-    "E",
-    "F",
-    "I",
-    "UP",
-    "B",
-]
-ignore = [
-    "E501",
-]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -78,9 +80,7 @@ indent-style = "space"
 [tool.coverage.run]
 branch = true
 source = ["drugdoc"]
-omit = [
-    "*/__init__.py",
-]
+omit = ["*/__init__.py"]
 
 [tool.coverage.report]
 show_missing = true
